@@ -1,50 +1,39 @@
-import { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
+import { useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
-import { api } from '../services/api';
 import { MessageSquare, Trash2, Clock, Plus, Wrench, RefreshCw } from 'lucide-react';
+import { useChatStore } from '../store/chatStore';
 
-const ConversationHistory = forwardRef(function ConversationHistory({ onSelectConversation, currentConversationId }, ref) {
+export default function ConversationHistory({ onSelectConversation }) {
   const { getToken } = useAuth();
-  const [conversations, setConversations] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-
-  // Expose refresh function to parent
-  useImperativeHandle(ref, () => ({
-    refresh: loadConversations
-  }));
+  
+  // Get state and actions from Zustand store
+  const conversations = useChatStore((state) => state.conversations);
+  const conversationsLoading = useChatStore((state) => state.conversationsLoading);
+  const currentConversationId = useChatStore((state) => state.currentConversationId);
+  const loadConversations = useChatStore((state) => state.loadConversations);
+  const deleteConversation = useChatStore((state) => state.deleteConversation);
 
   useEffect(() => {
-    loadConversations();
-  }, []);
-
-  const loadConversations = async () => {
-    try {
-      setRefreshing(true);
+    const load = async () => {
       const token = await getToken();
-      const data = await api.getConversations(token);
-      setConversations(data.conversations || []);
-    } catch (error) {
-      console.error('Error loading conversations:', error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
+      await loadConversations(token);
+    };
+    load();
+  }, [getToken]);
+
+  const handleRefresh = async () => {
+    const token = await getToken();
+    await loadConversations(token);
   };
 
   const handleDelete = async (conversationId, e) => {
     e.stopPropagation();
     if (!confirm('Are you sure you want to delete this conversation?')) return;
 
-    try {
-      const token = await getToken();
-      await api.deleteConversation(token, conversationId);
-      setConversations(conversations.filter(c => c.id !== conversationId));
-      if (currentConversationId === conversationId) {
-        onSelectConversation(null);
-      }
-    } catch (error) {
-      console.error('Error deleting conversation:', error);
+    const token = await getToken();
+    await deleteConversation(token, conversationId);
+    if (currentConversationId === conversationId) {
+      onSelectConversation(null);
     }
   };
 
@@ -69,7 +58,7 @@ const ConversationHistory = forwardRef(function ConversationHistory({ onSelectCo
     return date.toLocaleDateString();
   };
 
-  if (loading) {
+  if (conversationsLoading) {
     return (
       <div className="p-4 space-y-3">
         {[1, 2, 3].map(i => (
@@ -87,12 +76,11 @@ const ConversationHistory = forwardRef(function ConversationHistory({ onSelectCo
           Conversations
         </h2>
         <button
-          onClick={loadConversations}
-          disabled={refreshing}
-          className="p-2 hover:bg-secondary rounded-lg transition-colors disabled:opacity-50"
+          onClick={handleRefresh}
+          className="p-2 hover:bg-secondary rounded-lg transition-colors"
           title="Refresh conversations"
         >
-          <RefreshCw className={`w-4 h-4 text-muted-foreground ${refreshing ? 'animate-spin' : ''}`} />
+          <RefreshCw className="w-4 h-4 text-muted-foreground" />
         </button>
       </div>
 
@@ -154,6 +142,4 @@ const ConversationHistory = forwardRef(function ConversationHistory({ onSelectCo
       </div>
     </div>
   );
-});
-
-export default ConversationHistory;
+}

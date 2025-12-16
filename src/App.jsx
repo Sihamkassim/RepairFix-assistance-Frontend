@@ -2,15 +2,19 @@ import { SignedIn, SignedOut, SignUpButton, useAuth } from '@clerk/clerk-react';
 import Header from './components/Header';
 import ChatInterface from './components/ChatInterface';
 import ConversationHistory from './components/ConversationHistory';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from './services/api';
+import { useChatStore } from './store/chatStore';
 import { Menu, X, Wrench, Cpu, Smartphone, Laptop, Zap, Shield, MessageSquare, ArrowRight } from 'lucide-react';
 
 function App() {
   const { getToken, isSignedIn } = useAuth();
-  const [selectedConversationId, setSelectedConversationId] = useState(null);
   const [showSidebar, setShowSidebar] = useState(true);
-  const conversationHistoryRef = useRef(null);
+  
+  // Get currentConversationId from Zustand store
+  const currentConversationId = useChatStore((state) => state.currentConversationId);
+  const setCurrentConversationId = useChatStore((state) => state.setCurrentConversationId);
+  const startNewConversation = useChatStore((state) => state.startNewConversation);
 
   // Trigger backend to create user on first sign-in
   useEffect(() => {
@@ -27,16 +31,14 @@ function App() {
   }, [isSignedIn, getToken]);
 
   const handleSelectConversation = (conversationId) => {
-    setSelectedConversationId(conversationId);
+    if (conversationId === null) {
+      startNewConversation();
+    } else {
+      setCurrentConversationId(conversationId);
+    }
     // On mobile, close sidebar after selection
     if (window.innerWidth < 768) {
       setShowSidebar(false);
-    }
-  };
-
-  const handleRefreshHistory = () => {
-    if (conversationHistoryRef.current) {
-      conversationHistoryRef.current.refresh();
     }
   };
 
@@ -157,18 +159,14 @@ function App() {
             } md:translate-x-0 fixed md:relative z-40 w-80 bg-card border-r border-border transition-transform duration-300 h-full`}
           >
             <ConversationHistory
-              ref={conversationHistoryRef}
               onSelectConversation={handleSelectConversation}
-              currentConversationId={selectedConversationId}
             />
           </aside>
 
           {/* Main chat area */}
           <main className="flex-1 overflow-hidden bg-background">
             <ChatInterface
-              conversationId={selectedConversationId}
-              onConversationCreated={setSelectedConversationId}
-              onRefreshHistory={handleRefreshHistory}
+              conversationId={currentConversationId}
             />
           </main>
         </div>
