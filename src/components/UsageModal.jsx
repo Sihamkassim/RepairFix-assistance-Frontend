@@ -94,17 +94,17 @@ export default function UsageModal({ isOpen, onClose }) {
                     <p className="text-xs text-muted-foreground">Resets at midnight UTC</p>
                   </div>
                   <span className="text-xs font-mono font-bold text-primary">
-                    {Math.round(Math.min(((usage?.daily_tokens || 0) / 10000) * 100, 100))}%
+                    {Math.round(Math.min(((usage?.daily_tokens || 0) / 90000) * 100, 100))}%
                   </span>
                 </div>
                 <div className="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
                   <div 
                     className="bg-gradient-to-r from-blue-600 to-indigo-600 h-full rounded-full transition-all duration-1000" 
-                    style={{ width: `${Math.min(((usage?.daily_tokens || 0) / 10000) * 100, 100)}%` }}
+                    style={{ width: `${Math.min(((usage?.daily_tokens || 0) / 90000) * 100, 100)}%` }}
                   ></div>
                 </div>
                 <p className="text-[10px] text-center text-muted-foreground">
-                  {usage?.daily_tokens?.toLocaleString() || 0} / 10,000 tokens used today
+                  {usage?.daily_tokens?.toLocaleString() || 0} / 90,000 tokens used today
                 </p>
               </div>
             </>

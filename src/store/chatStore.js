@@ -31,7 +31,7 @@ export const useChatStore = create((set, get) => ({
   // Helper to check if daily limit is reached
   isOverLimit: () => {
     const { usage } = get();
-    return (usage?.daily_tokens || 0) >= 10000;
+    return (usage?.daily_tokens || 0) >= 90000;
   },
 
   // Load all conversations
