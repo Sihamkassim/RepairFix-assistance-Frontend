@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Send, Sparkles } from 'lucide-react';
 import { cn } from '../lib/utils';
 
-export default function ChatInput({ onSendMessage, disabled }) {
+export default function ChatInput({ onSendMessage, disabled, placeholder }) {
   const [message, setMessage] = useState('');
 
   const handleSubmit = (e) => {
@@ -23,18 +23,22 @@ export default function ChatInput({ onSendMessage, disabled }) {
   return (
     <form onSubmit={handleSubmit} className="border-t border-border bg-card p-4">
       <div className="max-w-4xl mx-auto">
-        <div className="flex gap-3 items-end bg-secondary/50 rounded-2xl p-2 border border-border focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+        <div className={cn(
+          "flex gap-3 items-end bg-secondary/50 rounded-2xl p-2 border border-border transition-all",
+          !disabled && "focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20",
+          disabled && "opacity-75 bg-secondary/30"
+        )}>
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask about fixing your device..."
+            placeholder={placeholder || "Ask about fixing your device..."}
             disabled={disabled}
             rows={1}
             className={cn(
               "flex-1 resize-none bg-transparent px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground",
               "focus:outline-none",
-              "disabled:opacity-50 disabled:cursor-not-allowed",
+              "disabled:cursor-not-allowed",
               "max-h-32"
             )}
             style={{

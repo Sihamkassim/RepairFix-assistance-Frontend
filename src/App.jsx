@@ -2,6 +2,7 @@ import { SignedIn, SignedOut, SignUpButton, useAuth } from '@clerk/clerk-react';
 import Header from './components/Header';
 import ChatInterface from './components/ChatInterface';
 import ConversationHistory from './components/ConversationHistory';
+import UsageModal from './components/UsageModal';
 import { useEffect, useState } from 'react';
 import { api } from './services/api';
 import { useChatStore } from './store/chatStore';
@@ -10,6 +11,7 @@ import { Menu, X, Wrench, Cpu, Smartphone, Laptop, Zap, Shield, MessageSquare, A
 function App() {
   const { getToken, isSignedIn } = useAuth();
   const [showSidebar, setShowSidebar] = useState(true);
+  const [isUsageOpen, setIsUsageOpen] = useState(false);
   
   // Get currentConversationId from Zustand store
   const currentConversationId = useChatStore((state) => state.currentConversationId);
@@ -44,7 +46,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header onOpenUsage={() => setIsUsageOpen(true)} />
       
       <SignedOut>
         {/* Hero Section */}
@@ -171,6 +173,8 @@ function App() {
           </main>
         </div>
       </SignedIn>
+
+      <UsageModal isOpen={isUsageOpen} onClose={() => setIsUsageOpen(false)} />
     </div>
   );
 }

@@ -1,8 +1,8 @@
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from '@clerk/clerk-react';
 import { useTheme } from '../context/ThemeContext';
-import { Sun, Moon, Wrench } from 'lucide-react';
+import { Sun, Moon, Wrench, BarChart3 } from 'lucide-react';
 
-export default function Header() {
+export default function Header({ onOpenUsage }) {
   const { theme, toggleTheme } = useTheme();
   
   return (
@@ -21,6 +21,17 @@ export default function Header() {
         </div>
         
         <div className="flex items-center gap-3">
+          <SignedIn>
+            <button
+              onClick={onOpenUsage}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary hover:bg-secondary/80 transition-all duration-200 text-sm font-medium text-foreground"
+              title="View Usage"
+            >
+              <BarChart3 className="w-4 h-4 text-primary" />
+              <span className="hidden md:inline">Usage</span>
+            </button>
+          </SignedIn>
+
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}

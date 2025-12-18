@@ -13,18 +13,26 @@ export default function ConversationHistory({ onSelectConversation }) {
   const currentConversationId = useChatStore((state) => state.currentConversationId);
   const loadConversations = useChatStore((state) => state.loadConversations);
   const deleteConversation = useChatStore((state) => state.deleteConversation);
+  const usage = useChatStore((state) => state.usage);
+  const loadUsage = useChatStore((state) => state.loadUsage);
 
   useEffect(() => {
     const load = async () => {
       const token = await getToken();
-      await loadConversations(token);
+      await Promise.all([
+        loadConversations(token),
+        loadUsage(token)
+      ]);
     };
     load();
   }, [getToken]);
 
   const handleRefresh = async () => {
     const token = await getToken();
-    await loadConversations(token);
+    await Promise.all([
+      loadConversations(token),
+      loadUsage(token)
+    ]);
   };
 
   const handleDelete = async (conversationId, e) => {

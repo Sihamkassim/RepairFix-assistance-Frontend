@@ -19,6 +19,21 @@ export const useChatStore = create((set, get) => ({
   // Error state
   error: null,
 
+  // Usage state
+  usage: {
+    total_tokens: 0,
+    daily_tokens: 0,
+    total_conversations: 0,
+    total_messages: 0
+  },
+  usageLoading: false,
+
+  // Helper to check if daily limit is reached
+  isOverLimit: () => {
+    const { usage } = get();
+    return (usage?.daily_tokens || 0) >= 10000;
+  },
+
   // Load all conversations
   loadConversations: async (token) => {
     set({ conversationsLoading: true, error: null });
@@ -31,6 +46,18 @@ export const useChatStore = create((set, get) => ({
     } catch (error) {
       console.error('Error loading conversations:', error);
       set({ conversationsLoading: false, error: error.message });
+    }
+  },
+
+  // Load usage stats
+  loadUsage: async (token) => {
+    set({ usageLoading: true });
+    try {
+      const data = await api.getUsage(token);
+      set({ usage: data.usage || { total_tokens: 0, total_conversations: 0, total_messages: 0 }, usageLoading: false });
+    } catch (error) {
+      console.error('Error loading usage:', error);
+      set({ usageLoading: false });
     }
   },
 
@@ -218,8 +245,9 @@ export const useChatStore = create((set, get) => ({
                   fullResponse = ''; // Mark as handled
                 }
                 
-                // Refresh conversations list
+                // Refresh conversations list and usage
                 loadConversations(token);
+                get().loadUsage(token);
                 break;
                 
               case 'error':

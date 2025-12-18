@@ -22,6 +22,7 @@ export default function ChatInterface({ conversationId: initialConversationId })
   const startNewConversation = useChatStore((state) => state.startNewConversation);
   const sendMessage = useChatStore((state) => state.sendMessage);
   const clearError = useChatStore((state) => state.clearError);
+  const isOverLimit = useChatStore((state) => state.isOverLimit());
 
   // Load conversation when initialConversationId changes
   useEffect(() => {
@@ -153,7 +154,11 @@ export default function ChatInterface({ conversationId: initialConversationId })
       </div>
 
       {/* Input Area */}
-      <ChatInput onSendMessage={handleSendMessage} disabled={isStreaming} />
+      <ChatInput 
+        onSendMessage={handleSendMessage} 
+        disabled={isStreaming || isOverLimit} 
+        placeholder={isOverLimit ? "Daily limit reached. Try again tomorrow!" : "Ask about a repair..."}
+      />
 
       {/* Error Toast */}
       {error && (
