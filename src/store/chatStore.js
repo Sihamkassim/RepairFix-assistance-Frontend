@@ -21,9 +21,12 @@ export const useChatStore = create((set, get) => ({
 
   // Load all conversations
   loadConversations: async (token) => {
-    set({ conversationsLoading: true });
+    set({ conversationsLoading: true, error: null });
     try {
       const data = await api.getConversations(token);
+      if (data.error) {
+        throw new Error(data.error);
+      }
       set({ conversations: data.conversations || [], conversationsLoading: false });
     } catch (error) {
       console.error('Error loading conversations:', error);

@@ -9,6 +9,7 @@ export default function ConversationHistory({ onSelectConversation }) {
   // Get state and actions from Zustand store
   const conversations = useChatStore((state) => state.conversations);
   const conversationsLoading = useChatStore((state) => state.conversationsLoading);
+  const error = useChatStore((state) => state.error);
   const currentConversationId = useChatStore((state) => state.currentConversationId);
   const loadConversations = useChatStore((state) => state.loadConversations);
   const deleteConversation = useChatStore((state) => state.deleteConversation);
@@ -40,13 +41,21 @@ export default function ConversationHistory({ onSelectConversation }) {
   const formatDate = (dateString) => {
     if (!dateString) return 'Just now';
     
-    const date = new Date(dateString);
+    // Parse the date - handle both ISO string and PostgreSQL timestamp formats
+    let date = new Date(dateString);
     
     // Check for invalid date
     if (isNaN(date.getTime())) return 'Just now';
     
+    // Get current time
     const now = new Date();
-    const diffMs = now - date;
+    
+    // Calculate difference in milliseconds
+    const diffMs = now.getTime() - date.getTime();
+    
+    // Handle edge cases where date is in the future (clock skew)
+    if (diffMs < 0) return 'Just now';
+    
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
@@ -85,7 +94,13 @@ export default function ConversationHistory({ onSelectConversation }) {
       </div>
 
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
-        {conversations.length === 0 ? (
+        {error && (
+          <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-sm text-red-500 mb-2">
+            Error: {error}
+            <button onClick={handleRefresh} className="block mt-1 underline">Try again</button>
+          </div>
+        )}
+        {conversations.length === 0 && !error ? (
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-secondary rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Wrench className="w-8 h-8 text-muted-foreground" />

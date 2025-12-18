@@ -116,6 +116,7 @@ export default function ChatInterface({ conversationId: initialConversationId })
               key={message.id}
               message={message}
               isUser={message.role === 'user'}
+              onResend={message.role === 'user' ? handleSendMessage : undefined}
             />
           ))}
 
